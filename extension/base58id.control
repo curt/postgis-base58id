@@ -1,0 +1,5 @@
+# base58id.control
+comment = '64-bit unsigned integer with Base-58 text I/O'
+default_version = '1.0'
+relocatable = true
+module_pathname = '$libdir/base58id'
