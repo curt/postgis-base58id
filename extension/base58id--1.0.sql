@@ -1,6 +1,15 @@
 -- base58id--1.0.sql
 
--- Create the type. 8 bytes, by-value, double alignment.
+-- Create shell type first
+CREATE TYPE base58id;
+
+-- Text/Binary I/O functions (must be defined before the full type definition)
+CREATE FUNCTION base58id_in(cstring)  RETURNS base58id IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
+CREATE FUNCTION base58id_out(base58id) RETURNS cstring  IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
+CREATE FUNCTION base58id_recv(internal) RETURNS base58id IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
+CREATE FUNCTION base58id_send(base58id) RETURNS bytea    IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
+
+-- Now create the full type definition. 8 bytes, by-value, double alignment.
 CREATE TYPE base58id (
   INPUT          = base58id_in,
   OUTPUT         = base58id_out,
@@ -46,12 +55,6 @@ CREATE OPERATOR CLASS base58id_hash_ops
 DEFAULT FOR TYPE base58id USING hash AS
   OPERATOR 1 = ,
   FUNCTION 1 base58id_hash(base58id);
-
--- Text/Binary I/O
-CREATE FUNCTION base58id_in(cstring)  RETURNS base58id IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
-CREATE FUNCTION base58id_out(base58id) RETURNS cstring  IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
-CREATE FUNCTION base58id_recv(internal) RETURNS base58id IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
-CREATE FUNCTION base58id_send(base58id) RETURNS bytea    IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
 
 -- Casts
 CREATE FUNCTION base58id_to_bigint(base58id) RETURNS bigint IMMUTABLE STRICT LANGUAGE C AS 'MODULE_PATHNAME';
