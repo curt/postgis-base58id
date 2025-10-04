@@ -1,0 +1,9 @@
+ARG BASE_IMAGE=postgres:17-alpine
+FROM ${BASE_IMAGE}
+
+# Copy the files installed via "make install DESTDIR=dist/"
+# (the DIST tree mirrors /usr inside the container)
+COPY dist/usr /usr
+
+# Optional: auto-enable on first init
+COPY docker/initdb/ /docker-entrypoint-initdb.d/
