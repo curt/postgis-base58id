@@ -200,11 +200,10 @@ Datum base58id_ge(PG_FUNCTION_ARGS)
     PG_RETURN_BOOL(GET_BASE58ID(0) >= GET_BASE58ID(1));
 }
 
-/* Hash (32-bit) – fold 64->32 */
+/* Hash (32-bit) – use PostgreSQL's hash_any for good distribution */
 PG_FUNCTION_INFO_V1(base58id_hash);
 Datum base58id_hash(PG_FUNCTION_ARGS)
 {
     uint64 v = GET_BASE58ID(0);
-    uint32 h = (uint32)(v ^ (v >> 32));
-    PG_RETURN_UINT32(h);
+    return hash_any((unsigned char *) &v, sizeof(uint64));
 }
