@@ -26,26 +26,35 @@ b58_init(void)
 static char *
 b58_encode_u64(uint64 val, char *buf, size_t buflen)
 {
-    /* Max digits base58 for 2^64-1 is 11. (Actually 11.0xx) We'll just allow more. */
+    /* Max digits base58 for 2^64-1 is 11. We pad all output to 11 chars. */
+    #define B58_WIDTH 11
     char tmp[24];
     int  len = 0;
 
     if (buflen < sizeof(tmp))
         ereport(ERROR, (errmsg("internal buffer too small")));
 
+    /* Convert value to base58 digits (least significant first) */
     if (val == 0) {
-        buf[0] = '1'; buf[1] = '\0';
-        return buf;
+        len = 1;
+        tmp[0] = '1';
+    } else {
+        while (val > 0) {
+            uint64 q = val / 58;
+            uint32 r = (uint32)(val - q*58);
+            tmp[len++] = B58_ALPH[r];
+            val = q;
+        }
     }
-    while (val > 0) {
-        uint64 q = val / 58;
-        uint32 r = (uint32)(val - q*58);
-        tmp[len++] = B58_ALPH[r];
-        val = q;
+
+    /* Pad with leading '1' (base58 zero) to B58_WIDTH, then reverse into buf */
+    for (int i = 0; i < B58_WIDTH; i++) {
+        if (i < len)
+            buf[i] = tmp[len - 1 - i];
+        else
+            buf[i] = '1';  /* left-pad with '1' (represents 0) */
     }
-    /* reverse into buf */
-    for (int i = 0; i < len; i++) buf[i] = tmp[len - 1 - i];
-    buf[len] = '\0';
+    buf[B58_WIDTH] = '\0';
     return buf;
 }
 
