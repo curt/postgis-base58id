@@ -57,3 +57,4 @@ dkms.conf
 # Project
 *.bc
 dist
+.tmp*
